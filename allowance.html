@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Allowance Tracker</title>
+
+  <style>
+    /* ===== CSS: how the page looks ===== */
+    :root {
+      --bg: #f3f6f4;        /* page background */
+      --ink: #1c2a24;       /* main text */
+      --muted: #62726a;     /* softer text */
+      --line: #d3ddd8;      /* borders */
+      --income: #1f7a46;    /* green for money in */
+      --expense: #b3402f;   /* red for money out */
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+    }
+
+    main { max-width: 640px; margin: 0 auto; padding: 32px 20px 64px; }
+
+    h1 { margin: 0 0 20px; font-size: 1.8rem; }
+
+    .balance {
+      padding: 20px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .balance .label { color: var(--muted); margin: 0; }
+    .balance .amount { font-size: 2.6rem; font-weight: 700; margin: 0; }
+
+    .totals { display: flex; gap: 24px; margin-top: 8px; color: var(--muted); }
+    .totals .in { color: var(--income); }
+    .totals .out { color: var(--expense); }
+
+    form { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+
+    input, select, button {
+      font: inherit;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: white;
+      color: var(--ink);
+    }
+
+    #description { flex: 1 1 180px; }
+    #amount { width: 110px; }
+
+    button { cursor: pointer; }
+    button.add { background: var(--ink); color: white; border-color: var(--ink); }
+
+    ul { list-style: none; margin: 0; padding: 0; }
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .what { flex: 1; }
+    .when { display: block; color: var(--muted); font-size: 0.85rem; }
+
+    .money { font-weight: 700; }
+    .money.income { color: var(--income); }
+    .money.expense { color: var(--expense); }
+
+    .remove { padding: 2px 8px; color: var(--muted); }
+
+    .empty { color: var(--muted); font-style: italic; }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>Allowance Tracker</h1>
+
+    <div class="balance">
+      <p class="label">Current balance</p>
+      <p class="amount" id="balance"></p>
+      <!-- JavaScript fills in the balance here -->
+      <div class="totals">
+        <span class="in" id="totalIn"></span>
+        <span class="out" id="totalOut"></span>
+      </div>
+    </div>
+
+    <form id="entryForm">
+      <input id="description" type="text" placeholder="What is it for?" required>
+      <input id="amount" type="number" min="0.01" step="0.01" placeholder="Amount" required>
+      <!-- step="0.01" allows cents; min stops zero or negative amounts -->
+      <select id="type">
+        <option value="income">Money in</option>
+        <option value="expense">Money out</option>
+      </select>
+      <button class="add" type="submit">Add</button>
+    </form>
+
+    <ul id="list"></ul>
+    <!-- JavaScript builds the list of entries here -->
+  </main>
+
+  <script>
+    // ===== JavaScript: how the page behaves =====
+
+    // 1. DATA ---------------------------------------------------------
+    let entries = loadEntries();
+    // "entries" is the list of every money in / money out record
+
+    function loadEntries() {
+      try {
+        return JSON.parse(localStorage.getItem("allowanceEntries")) || [];
+      } catch (error) {
+        return []; // start fresh if saved data is broken
+      }
+    }
+
+    function saveEntries() {
+      try {
+        localStorage.setItem("allowanceEntries", JSON.stringify(entries));
+      } catch (error) {
+        // Some previews block saving. The page still works, it just will not remember
+      }
+    }
+
+    // 2. HELPER -------------------------------------------------------
+    function formatMoney(number) {
+      // Turns 12.5 into "$12.50". Change "$" to your own currency symbol if you like
+      return "$" + number.toFixed(2);
+    }
+
+    // 3. DRAWING THE PAGE ---------------------------------------------
+    function render() {
+      let totalIn = 0;   // running total of money in
+      let totalOut = 0;  // running total of money out
+
+      const list = document.getElementById("list");
+      list.innerHTML = ""; // clear the old list
+
+      if (entries.length === 0) {
+        list.innerHTML = '<li class="empty">No entries yet. Add your first one above.</li>';
+      }
+
+      // Show newest first: copy the list, then reverse the copy
+      [...entries].reverse().forEach(entry => {
+        if (entry.type === "income") totalIn += entry.amount;
+        else totalOut += entry.amount;
+
+        const row = document.createElement("li");
+
+        const what = document.createElement("span");
+        what.className = "what";
+        what.textContent = entry.description;
+
+        const when = document.createElement("span");
+        when.className = "when";
+        when.textContent = entry.date;
+        what.appendChild(when); // put the date under the description
+
+        const money = document.createElement("span");
+        money.className = "money " + entry.type;
+        money.textContent = (entry.type === "income" ? "+" : "-") + formatMoney(entry.amount);
+
+        const remove = document.createElement("button");
+        remove.className = "remove";
+        remove.type = "button";
+        remove.textContent = "Remove";
+        remove.addEventListener("click", () => {
+          entries = entries.filter(e => e.id !== entry.id); // keep all except this one
+          saveEntries();
+          render();
+        });
+
+        row.append(what, money, remove);
+        list.appendChild(row);
+      });
+
+      document.getElementById("balance").textContent = formatMoney(totalIn - totalOut);
+      document.getElementById("totalIn").textContent = "In: " + formatMoney(totalIn);
+      document.getElementById("totalOut").textContent = "Out: " + formatMoney(totalOut);
+    }
+
+    // 4. FORM ---------------------------------------------------------
+    document.getElementById("entryForm").addEventListener("submit", event => {
+      event.preventDefault(); // stop the page from reloading
+
+      entries.push({
+        id: Date.now(), // unique number for this entry
+        description: document.getElementById("description").value.trim(),
+        amount: parseFloat(document.getElementById("amount").value), // text to number
+        type: document.getElementById("type").value,
+        date: new Date().toLocaleDateString("en-US", {
+          month: "short", day: "numeric", year: "numeric"
+        })
+      });
+
+      saveEntries();
+      document.getElementById("description").value = "";
+      document.getElementById("amount").value = "";
+      render();
+    });
+
+    // 5. START --------------------------------------------------------
+    render();
+  </script>
+</body>
+</html>
