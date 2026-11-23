@@ -8,20 +8,20 @@
   <style>
     /* ===== CSS: how the page looks ===== */
     :root {
-      --bg: #f3f6f4;        /* page background */
-      --ink: #1c2a24;       /* main text */
-      --muted: #62726a;     /* softer text */
-      --line: #d3ddd8;      /* borders */
-      --income: #1f7a46;    /* green for money in */
-      --expense: #b3402f;   /* red for money out */
+      --bg: #f3f6f4;        
+      --ink: #1c2a24;       
+      --muted: #62726a;     
+      --line: #d3ddd8;      
+      --income: #1f7a46;    
+      --expense: #b3402f;   
     }
 
     * { box-sizing: border-box; }
 
     body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
+      margin: 0; 
+      background: var(--bg);  
+      color: var(--ink);/
       font-family: system-ui, sans-serif;
       line-height: 1.5;
     }
@@ -117,7 +117,6 @@
   <script>
     // ===== JavaScript: how the page behaves =====
 
-    // 1. DATA ---------------------------------------------------------
     let entries = loadEntries();
     // "entries" is the list of every money in / money out record
 
@@ -137,13 +136,11 @@
       }
     }
 
-    // 2. HELPER -------------------------------------------------------
     function formatMoney(number) {
       // Turns 12.5 into "$12.50". Change "$" to your own currency symbol if you like
       return "$" + number.toFixed(2);
     }
 
-    // 3. DRAWING THE PAGE ---------------------------------------------
     function render() {
       let totalIn = 0;   // running total of money in
       let totalOut = 0;  // running total of money out
@@ -194,7 +191,7 @@
       document.getElementById("totalOut").textContent = "Out: " + formatMoney(totalOut);
     }
 
-    // 4. FORM ---------------------------------------------------------
+  
     document.getElementById("entryForm").addEventListener("submit", event => {
       event.preventDefault(); // stop the page from reloading
 
@@ -214,7 +211,7 @@
       render();
     });
 
-    // 5. START --------------------------------------------------------
+    
     render();
   </script>
 </body>
