@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Allowance Tracker</title>
-  <p class=123Just input your current allowance, rename it as "my allowance", then choose "money in" and click "Add" to track it! </h1></p>
-<h1 style="color:rgb(63, 0, 92)">Just input your current allowance, rename it as "my allowance", then choose "money in" and click "Add" to track it! </h1></p>
+<h1 style="color:rgb(63, 0, 92)">Just input your current allowance, rename it as "my allowance", then choose "money in" and click "Add" to track it! </h1>
 
   <style>
     
@@ -122,7 +121,6 @@
   <script>
   
     let entries = loadEntries();
-    // "entries" is the list of every money in / money out record
 
     function loadEntries() {
       try {
@@ -140,7 +138,6 @@
       }
     }
 
-    // 2. HELPER -------------------------------------------------------
     function formatMoney(number) {
       // Turns 12.5 into "₱12.50". 
       return "₱" + number.toFixed(2);
@@ -151,7 +148,7 @@
       let totalOut = 0;  // running total of money out
 
       const list = document.getElementById("list");
-      list.innerHTML = ""; // clear the old list
+      list.innerHTML = ""; 
 
       if (entries.length === 0) {
         list.innerHTML = '<li class="empty">No entries yet. Add your first one above.</li>';
