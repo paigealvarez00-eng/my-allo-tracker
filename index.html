@@ -1,27 +1,221 @@
 <!DOCTYPE html>
-<html>
-	<title> Allowance Tracker</title>
-	<body style="background-color:rgb(255, 173, 173)">
-		<h1 style="color:rgb(0, 0, 0)">Welcome to Allo Website</h1>
-		<h2 style="color:rgb(48, 0, 33)">A website that assists you in tracking where your money goes!</h2>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Allowance Tracker</title>
+  <p class=123Just input your current allowance, rename it as "my allowance", then choose "money in" and click "Add" to track it! </h1></p>
+<h1 style="color:rgb(63, 0, 92)">Just input your current allowance, rename it as "my allowance", then choose "money in" and click "Add" to track it! </h1></p>
+
+  <style>
+    
+    :root {
+      --bg: #fdb9e1;        
+      --ink: #1c2a24;       
+      --muted: #000000;     
+      --line: #000661;      
+      --income: #1f7a46;   
+      --expense: #b3402f;   
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+    }
+
+    main { max-width: 640px; margin: 0 auto; padding: 32px 20px 64px; }
+
+    h1 { margin: 0 0 20px; font-size: 1.8rem; }
+
+    .balance {
+      padding: 20px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .balance .label { color: var(--muted); margin: 0; }
+    .balance .amount { font-size: 2.6rem; font-weight: 700; margin: 0; }
+
+    .totals { display: flex; gap: 24px; margin-top: 8px; color: var(--muted); }
+    .totals .in { color: var(--income); }
+    .totals .out { color: var(--expense); }
+
+    form { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+
+    input, select, button {
+      font: inherit;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: white;
+      color: var(--ink);
+    }
+
+    #description { flex: 1 1 180px; }
+    #amount { width: 110px; }
+
+    button { cursor: pointer; }
+    button.add { background: var(--ink); color: white; border-color: var(--ink); }
+
+    ul { list-style: none; margin: 0; padding: 0; }
+
+    li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;                
+  margin-bottom: 10px;               
+  background: white;                 
+  border: 1px solid var(--line);     
+  border-radius: 8px;                
+}
+
+    .what { flex: 1; }
+    .when { display: block; color: var(--muted); font-size: 0.85rem; }
+
+    .money { font-weight: 700; }
+    .money.income { color: var(--income); }
+    .money.expense { color: var(--expense); }
+
+    .remove { padding: 2px 8px; color: var(--muted); }
+
+    .empty { color: var(--muted); font-style: italic; }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>ALLO your Allowance Tracker</h1>
+
+    <div class="balance">
+      <p class="label">Current balance</p>
+      <p class="amount" id="balance"></p>
+      <!-- JavaScript fills in the balance here -->
+      <div class="totals">
+        <span class="in" id="totalIn"></span>
+        <span class="out" id="totalOut"></span>
+      </div>
+    </div>
+
+    <form id="entryForm">
+      <input id="description" type="text" placeholder="What is it for?" required>
+      <input id="amount" type="number" min="0.01" step="0.01" placeholder="Amount" required>
+      <!-- step="0.01" allows cents; min stops zero or negative amounts -->
+      <select id="type">
+        <option value="income">Money in</option>
+        <option value="expense">Money out</option>
+      </select>
+      <button class="add" type="submit">Add</button>
+    </form>
+
+    <ul id="list"></ul>
+    
+  </main>
+
+  <script>
+  
+    let entries = loadEntries();
+    // "entries" is the list of every money in / money out record
+
+    function loadEntries() {
+      try {
+        return JSON.parse(localStorage.getItem("allowanceEntries")) || [];
+      } catch (error) {
+        return []; 
+      }
+    }
+
+    function saveEntries() {
+      try {
+        localStorage.setItem("allowanceEntries", JSON.stringify(entries));
+      } catch (error) {
+        
+      }
+    }
+
+    // 2. HELPER -------------------------------------------------------
+    function formatMoney(number) {
+      // Turns 12.5 into "₱12.50". 
+      return "₱" + number.toFixed(2);
+    }
+
+    function render() {
+      let totalIn = 0;   // running total of money in
+      let totalOut = 0;  // running total of money out
+
+      const list = document.getElementById("list");
+      list.innerHTML = ""; // clear the old list
+
+      if (entries.length === 0) {
+        list.innerHTML = '<li class="empty">No entries yet. Add your first one above.</li>';
+      }
 
 
-		<p>Need <b><i><u></u>help tracking your expenses?</b></i></u> Say no more to stressul days of trying to figure out where your money went!</p>
-		
-			</p>Allo is here to help you with that!</p> 
-		
-		<b><i>Allo Tracker</i></b> allows you in alleviating the stress of tracking your expenses!
-		Just type in any amount you wanna track and Allo will handle it!</p>
-		<p>No worries, No hassle. Allo will do it for you.</p>
-		<p><a href="file:///C:/Users/Admin/Desktop/Allowance%20tracker/py/allowance%20idea/allo.html">Let Allo help you!</a></p>	
+      [...entries].reverse().forEach(entry => {
+        if (entry.type === "income") totalIn += entry.amount;
+        else totalOut += entry.amount;
 
-		<img src="https://i.pinimg.com/736x/64/96/53/64965327b447fcc71f2426d5ebe976bc.jpg">
+        const row = document.createElement("li");
 
+        const what = document.createElement("span");
+        what.className = "what";
+        what.textContent = entry.description;
 
-	</body>
-	<section>
-	
-	
+        const when = document.createElement("span");
+        when.className = "when";
+        when.textContent = entry.date;
+        what.appendChild(when); 
 
-	</section>
+        const money = document.createElement("span");
+        money.className = "money " + entry.type;
+        money.textContent = (entry.type === "income" ? "+" : "-") + formatMoney(entry.amount);
+
+        const remove = document.createElement("button");
+        remove.className = "remove";
+        remove.type = "button";
+        remove.textContent = "Remove";
+        remove.addEventListener("click", () => {
+          entries = entries.filter(e => e.id !== entry.id); 
+          saveEntries();
+          render();
+        });
+
+        row.append(what, money, remove);
+        list.appendChild(row);
+      });
+
+      document.getElementById("balance").textContent = formatMoney(totalIn - totalOut);
+      document.getElementById("totalIn").textContent = "In: " + formatMoney(totalIn);
+      document.getElementById("totalOut").textContent = "Out: " + formatMoney(totalOut);
+    }
+
+    document.getElementById("entryForm").addEventListener("submit", event => {
+      event.preventDefault(); // stop the page from reloading
+
+      entries.push({
+        id: Date.now(), // unique number for this entry
+        description: document.getElementById("description").value.trim(),
+        amount: parseFloat(document.getElementById("amount").value), 
+        type: document.getElementById("type").value,
+        date: new Date().toLocaleDateString("en-US", {
+          month: "short", day: "numeric", year: "numeric"
+        })
+      });
+
+      saveEntries();
+      document.getElementById("description").value = "";
+      document.getElementById("amount").value = "";
+      render();
+    });
+
+    render();
+  </script>
+</body>
 </html>
